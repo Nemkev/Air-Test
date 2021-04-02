@@ -1,0 +1,71 @@
+.fly-table {
+  background-color: #e6e6e6;
+}
+
+.table-item-data {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 70px;
+  justify-content: start;
+  margin-top: 10px;
+  background-color: white;
+  padding: 15px;
+  font-size: 1em;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.fly-status-landed {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #44b863;
+  padding: 8px;
+}
+
+.fly-status-shedule {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #3fbfbd;
+  padding: 8px;
+}
+
+.fly-status-delayed {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #c4454b;
+  padding: 8px;
+}
+
+.port-cell {
+  display: flex;
+  justify-content: start;
+  width: 100px;
+  margin-right: 5vw;
+  margin-left: 5vw;
+}
+
+.creation-fly-button {
+  position: fixed;
+  border: 0px;
+  background-color: white;
+  border-radius: 50%;
+  bottom: 20px;
+  right: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  color: white;
+  font-weight: bold;
+  float: right;
+  color: black;
+  font-size: 50px;
+  line-height: 45px;
+  cursor: pointer;
+}
+
+.load {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
