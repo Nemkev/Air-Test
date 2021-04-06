@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import db from "../models/db";
+import flyValidate from "../services/flyValidate";
 
 export const getAllFly = async (req: Request, res: Response) => {
   try {
@@ -37,6 +38,7 @@ export const createNewFly = async (req: Request, res: Response) => {
       scheduledDeparture,
       status,
     } = req.body;
+    await flyValidate.validateAsync(req.body);
 
     const newFly = await new db.FlightDetails({
       flightCode,
