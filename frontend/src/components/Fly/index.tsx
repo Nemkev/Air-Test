@@ -1,49 +1,23 @@
 import React, { useState, useEffect, useReducer } from "react";
 import axios from "axios";
 import { Button } from "@material-ui/core";
-import Modal from "@material-ui/core/Modal";
-import Backdrop from "@material-ui/core/Backdrop";
-import Fade from "@material-ui/core/Fade";
-import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
-import TextField from "@material-ui/core/TextField";
+import { ModalWindowCreate } from "../../modules/ModalCreate";
+import { ModalWindowUpdate } from "../../modules/ModalUpdate";
+import { ModalWindowDelete } from "../../modules/ModalDelete";
 import "./index.scss";
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: "flex",
-      flexDirection: "column",
-      "& > *": {
-        margin: theme.spacing(1),
-        width: "25ch",
-      },
-    },
-    modal: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    paper: {
-      backgroundColor: theme.palette.background.paper,
-      border: "2px solid #000",
-      boxShadow: theme.shadows[5],
-      padding: theme.spacing(2, 4, 3),
-    },
-  })
-);
 
 export const Fly = () => {
   const [
     {
-      flightCode,
-      flightProvider,
-      sourcePortName,
-      sourcePortCode,
-      destinationPortName,
-      destinationPortCode,
-      scheduledArrival,
-      scheduledDeparture,
-      status,
+      flightCodeUpdate,
+      flightProviderUpdate,
+      sourcePortNameUpdate,
+      sourcePortCodeUpdate,
+      destinationPortNameUpdate,
+      destinationPortCodeUpdate,
+      scheduledArrivalUpdate,
+      scheduledDepartureUpdate,
+      statusUpdate,
       flightCodeCreate,
       flightProviderCreate,
       sourcePortNameCreate,
@@ -56,15 +30,15 @@ export const Fly = () => {
     },
     setState,
   ] = useReducer((s: any, a: any) => ({ ...s, ...a }), {
-    flightCode: "",
-    flightProvider: "",
-    sourcePortName: "",
-    sourcePortCode: "",
-    destinationPortName: "",
-    destinationPortCode: "",
-    scheduledArrival: "",
-    scheduledDeparture: "",
-    status: "",
+    flightCodeUpdate: "",
+    flightProviderUpdate: "",
+    sourcePortNameUpdate: "",
+    sourcePortCodeUpdate: "",
+    destinationPortNameUpdate: "",
+    destinationPortCodeUpdate: "",
+    scheduledArrivalUpdate: "",
+    scheduledDepartureUpdate: "",
+    statusUpdate: "",
     flightCodeCreate: "",
     flightProviderCreate: "",
     sourcePortNameCreate: "",
@@ -85,27 +59,28 @@ export const Fly = () => {
   };
 
   const [flyData, setFlyData]: any = useState();
-  const classes = useStyles();
   const [openChange, setOpenChange] = useState(false);
   const [openCreate, setOpenCreate] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
   const [currItem, setCurrItem] = useState();
 
-  const handleOpenChange = (item: any) => {
+  const setCurrentItemState = (item: any) => {
     setState({
-      flightCode: item.flightCode,
-      flightProvider: item.flightProvider,
-      sourcePortName: item.sourcePortName,
-      sourcePortCode: item.sourcePortCode,
-      destinationPortName: item.destinationPortName,
-      destinationPortCode: item.destinationPortCode,
-      scheduledArrival: item.scheduledArrival,
-      scheduledDeparture: item.scheduledDeparture,
-      status: item.status,
+      flightCodeUpdate: item.flightCode,
+      flightProviderUpdate: item.flightProvider,
+      sourcePortNameUpdate: item.sourcePortName,
+      sourcePortCodeUpdate: item.sourcePortCode,
+      destinationPortNameUpdate: item.destinationPortName,
+      destinationPortCodeUpdate: item.destinationPortCode,
+      scheduledArrivalUpdate: item.scheduledArrival,
+      scheduledDepartureUpdate: item.scheduledDeparture,
+      statusUpdate: item.status,
     });
     setOpenChange(true);
   };
 
-  const handleCloseChange = () => {
+  const handleCloseChange = (e: any) => {
+    e.preventDefault();
     setOpenChange(false);
   };
 
@@ -113,39 +88,44 @@ export const Fly = () => {
     setOpenCreate(true);
   };
 
-  const handleCloseCreate = () => {
+  const handleCloseCreate = (e: any) => {
+    e.preventDefault();
     setOpenCreate(false);
+  };
+
+  const handleCloseDelete = (e: any) => {
+    e.preventDefault();
+    setOpenDelete(false);
   };
 
   const getData = async () => {
     const data: any = await axios.get("http://localhost:8000/fly");
-    const mapedData = data.data.map((item: any) => {
-      return (item.id = item._id);
-    });
     setFlyData(data.data);
   };
 
   const updateData = async () => {
     await axios.put(`http://localhost:8000/fly/${currItem}`, {
-      flightCode,
-      flightProvider,
-      sourcePortName,
-      sourcePortCode,
-      destinationPortName,
-      destinationPortCode,
-      scheduledArrival,
-      scheduledDeparture,
-      status,
+      flightCode: flightCodeUpdate,
+      flightProvider: flightProviderUpdate,
+      sourcePortName: sourcePortNameUpdate,
+      sourcePortCode: sourcePortCodeUpdate,
+      estinationPortName: destinationPortNameUpdate,
+      destinationPortCode: destinationPortCodeUpdate,
+      scheduledArrival: scheduledArrivalUpdate,
+      scheduledDeparture: scheduledDepartureUpdate,
+      status: statusUpdate,
     });
+    setOpenChange(false);
   };
 
-  const deleteData = async (id: any) => {
-    await axios.delete(`http://localhost:8000/fly/${id}`);
+  const deleteData = async () => {
+    await axios.delete(`http://localhost:8000/fly/${currItem}`);
+    setOpenDelete(false);
   };
 
   useEffect(() => {
     getData();
-  }, [openChange, openCreate]);
+  }, [openChange, openCreate, openDelete]);
 
   useEffect(() => {
     getData();
@@ -163,6 +143,7 @@ export const Fly = () => {
       scheduledDeparture: scheduledDepartureCreate,
       status: statusCreate,
     });
+    setOpenCreate(false);
   };
 
   return (
@@ -171,173 +152,42 @@ export const Fly = () => {
         <p className="load">Loading</p>
       ) : (
         <div className="fly-table">
-          <Modal
-            aria-labelledby="transition-modal-title"
-            aria-describedby="transition-modal-description"
-            className={classes.modal}
+          <ModalWindowCreate
             open={openCreate}
-            onClose={handleCloseCreate}
-            closeAfterTransition
-            BackdropComponent={Backdrop}
-            BackdropProps={{
-              timeout: 500,
-            }}
-          >
-            <Fade in={openCreate}>
-              <div className={classes.paper}>
-                <form className={classes.root} noValidate autoComplete="off">
-                  <TextField
-                    label="FlightProvider"
-                    variant="outlined"
-                    name="flightProviderCreate"
-                    value={flightProviderCreate}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="FlightCode"
-                    variant="outlined"
-                    name="flightCodeCreate"
-                    value={flightCodeCreate}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="SourcePortName"
-                    variant="outlined"
-                    name="sourcePortNameCreate"
-                    value={sourcePortNameCreate}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="SourcePortCode"
-                    variant="outlined"
-                    name="sourcePortCodeCreate"
-                    value={sourcePortCodeCreate}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="DestinationPortName"
-                    variant="outlined"
-                    name="destinationPortNameCreate"
-                    value={destinationPortNameCreate}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="DestinationPortCode"
-                    variant="outlined"
-                    name="destinationPortCodeCreate"
-                    value={destinationPortCodeCreate}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="ScheduledArrival"
-                    variant="outlined"
-                    name="scheduledArrivalCreate"
-                    value={scheduledArrivalCreate}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="ScheduledDeparture"
-                    variant="outlined"
-                    name="scheduledDepartureCreate"
-                    value={scheduledDepartureCreate}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="Status"
-                    variant="outlined"
-                    name="statusCreate"
-                    value={statusCreate}
-                    onChange={handleChange}
-                  />
-                  <Button onClick={createData}>Create</Button>
-                </form>
-              </div>
-            </Fade>
-          </Modal>
+            close={handleCloseCreate}
+            flightProviderCreate={flightProviderCreate}
+            flightCodeCreate={flightCodeCreate}
+            sourcePortNameCreate={sourcePortNameCreate}
+            sourcePortCodeCreate={sourcePortCodeCreate}
+            destinationPortNameCreate={destinationPortNameCreate}
+            destinationPortCodeCreate={destinationPortCodeCreate}
+            scheduledArrivalCreate={scheduledArrivalCreate}
+            scheduledDepartureCreate={scheduledDepartureCreate}
+            statusCreate={statusCreate}
+            handleChange={handleChange}
+            createFunction={createData}
+          />
 
-          <Modal
-            aria-labelledby="transition-modal-title"
-            aria-describedby="transition-modal-description"
-            className={classes.modal}
+          <ModalWindowUpdate
             open={openChange}
-            onClose={handleCloseChange}
-            closeAfterTransition
-            BackdropComponent={Backdrop}
-            BackdropProps={{
-              timeout: 500,
-            }}
-          >
-            <Fade in={openChange}>
-              <div className={classes.paper}>
-                <form className={classes.root} noValidate autoComplete="off">
-                  <TextField
-                    label="FlightProvider"
-                    variant="outlined"
-                    name="flightProvider"
-                    value={flightProvider}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="FlightCode"
-                    variant="outlined"
-                    name="flightCode"
-                    value={flightCode}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="SourcePortName"
-                    variant="outlined"
-                    name="sourcePortName"
-                    value={sourcePortName}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="SourcePortCode"
-                    variant="outlined"
-                    name="sourcePortCode"
-                    value={sourcePortCode}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="DestinationPortName"
-                    variant="outlined"
-                    name="destinationPortName"
-                    value={destinationPortName}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="DestinationPortCode"
-                    variant="outlined"
-                    name="destinationPortCode"
-                    value={destinationPortCode}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="ScheduledArrival"
-                    variant="outlined"
-                    name="scheduledArrival"
-                    value={scheduledArrival}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="ScheduledDeparture"
-                    variant="outlined"
-                    name="scheduledDeparture"
-                    value={scheduledDeparture}
-                    onChange={handleChange}
-                  />
-                  <TextField
-                    label="Status"
-                    variant="outlined"
-                    name="status"
-                    value={status}
-                    onChange={handleChange}
-                  />
-                  <Button onClick={updateData}>Update</Button>
-                </form>
-              </div>
-            </Fade>
-          </Modal>
+            close={handleCloseChange}
+            flightProviderUpdate={flightProviderUpdate}
+            flightCodeUpdate={flightCodeUpdate}
+            sourcePortNameUpdate={sourcePortNameUpdate}
+            sourcePortCodeUpdate={sourcePortCodeUpdate}
+            destinationPortNameUpdate={destinationPortNameUpdate}
+            destinationPortCodeUpdate={destinationPortCodeUpdate}
+            scheduledArrivalUpdate={scheduledArrivalUpdate}
+            scheduledDepartureUpdate={scheduledDepartureUpdate}
+            statusUpdate={statusUpdate}
+            handleChange={handleChange}
+            updateFunction={updateData}
+          />
+          <ModalWindowDelete
+            open={openDelete}
+            close={handleCloseDelete}
+            deleteFunction={deleteData}
+          />
           <div className="table-item-data">
             <div className="port-cell">Time</div>
             <div className="port-cell">Source Port</div>
@@ -347,7 +197,10 @@ export const Fly = () => {
           </div>
           {flyData.map((item: any) => (
             <div className="table-item-data" key={String(item._id)}>
-              <div className="port-cell">{item.scheduledArrival}</div>
+              <div className="port-cell">
+                {item.scheduledArrival.split("T")[0]}{" "}
+                {item.scheduledArrival.split("T")[1].slice(0, 5)}
+              </div>
               <div className="port-cell">{item.sourcePortName}</div>
               <div className="port-cell">{item.destinationPortName}</div>
               <div className="port-cell">
@@ -365,7 +218,7 @@ export const Fly = () => {
                   onClick={(e) => {
                     e.preventDefault();
                     setCurrItem(item._id);
-                    handleOpenChange(item);
+                    setCurrentItemState(item);
                   }}
                 >
                   Change
@@ -374,7 +227,8 @@ export const Fly = () => {
                   <Button
                     onClick={(e) => {
                       e.preventDefault();
-                      deleteData(item._id);
+                      setCurrItem(item._id);
+                      setOpenDelete(true);
                     }}
                   >
                     Delete
